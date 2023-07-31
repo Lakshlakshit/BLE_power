@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, SafeAreaView, Dimensions } from "react-native"
+import { useState } from "react";                 //inn
+import { useEffect } from "react";                //dono m dikkat hai shayad try catch bolck lgana hai
+import { StyleSheet, Text, TouchableOpacity, View,StatusBar , ScrollView, SafeAreaView, Dimensions } from "react-native"
 import BleManager from 'react-native-ble-manager';
-
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
   // const connectToPeripheral = peripheral => {
   //   if (peripheral.connected) {
@@ -16,9 +17,9 @@ import BleManager from 'react-native-ble-manager';
   //         let peripheralResponse = peripherals.get(peripheral.id);
   //         if (peripheralResponse) {
   //           peripheralResponse.connected = true;
-  //           peripherals.set(peripheral.id, peripheralResponse);
+  //           peripheral.set(peripheral.id, peripheralResponse);
   //           setConnected(true);
-  //           setBluetoothDevices(Array.from(peripherals.values()));
+  //           setBluetoothDevices(Array.from(peripheral.values()));
   //         }
   //         alert('Connected to ' + peripheral.name);
   //       })
@@ -57,7 +58,7 @@ import BleManager from 'react-native-ble-manager';
               style={{
                 fontSize: 18,
                 textTransform: 'capitalize',
-                color: connected ? Colors.white : Colors.black,
+               color: connected ? Colors.white : Colors.black,
               }}>
               {peripheral.name}
             </Text>
@@ -90,10 +91,12 @@ import BleManager from 'react-native-ble-manager';
   };
 
 
+
 export const Landing = () => {
   const [bluetoothDevices, setBluetoothDevices] = useState([]);
     const [isScanning, setIsScanning] = useState(false);
-    const [devices, setdevices] = useState([]);
+    const [Devices, setdevices] = useState([]);
+    // const isDarkMode = useColorScheme() === 'dark';
 
   useEffect(() => {
 
@@ -119,16 +122,27 @@ export const Landing = () => {
         });
       console.log('The bluetooth is already enabled or the user confirm');
     }
-    // navigation.navigate('homeScreen', { position: position });
   };
   return (
     <SafeAreaView style={[styles.main]}>
-      <ScrollView>
+      {/* <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={backgroundStyle.backgroundColor}
+      /> */}
+      <ScrollView
+      style = {styles.backgroundStyle}
+      contentContainerStyle ={styles.main}
+      contentInsetAdjustmentBehavior="automatic">
+        <View
+          style={{
+            backgroundColor: "blue",
+            marginBottom: 40,
+          }}>
         <View style={styles.main}>
           <Text style={styles.welcomeText}>
             Welcome to the Bluetooth Chat App
-
           </Text>
+          </View>
           <TouchableOpacity
            activeOpacity={0.5}
             style={styles.buttonStyle}
@@ -136,6 +150,7 @@ export const Landing = () => {
             <Text style={styles.buttonTextStyle}> {isScanning ? 'Scanning...' : 'Scan Bluetooth Devices'} </Text>
           </TouchableOpacity>
         </View>
+
         {/* list of scanned bluetooth devices */}
         {bluetoothDevices && bluetoothDevices?.map(device => (
           <View key={device.id}>
@@ -146,7 +161,6 @@ export const Landing = () => {
     </SafeAreaView>
   );
 };
-
 
 //const windowHeight = Dimensions.get("window").height;
 const styles = StyleSheet.create({
@@ -163,7 +177,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 40,
     textAlign: "center",
-    fontFamily: "Baloo2-Bold"
+    fontWeight: "Medium"
   },
   buttonStyle: {
     backgroundColor: 'white',
@@ -181,6 +195,10 @@ const styles = StyleSheet.create({
     color: "#0082FC",
     paddingVertical: 10,
     fontSize: 16,
-    fontFamily: "Baloo2-medium",
+    fontWeight: "600",
   },
-})
+  backgroundStyle:{
+    backgroundColor:"white",
+    borderWidth:0.5,
+  }
+});
