@@ -4,7 +4,6 @@ import {
   View,
   Platform,
   StatusBar,
-  ScrollView,
   StyleSheet,
   Dimensions,
   SafeAreaView,
@@ -25,6 +24,7 @@ const BleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 const App = () => {
   const peripherals = new Map();
   const [availableDevices, setAvailableDevices] = useState([]);
+  const [allperipherals, setAllPeripherals] = useState([]);
   const [display, setDisplay] = useState("none");
   const [isScanning, setIsScanning] = useState(false);      //changes
   const [connected, setConnected] = useState(false);
@@ -83,10 +83,6 @@ const App = () => {
   }, []);                                         // {...}  [{...}, {...}, {...}]
 
 
-  // useEffect(() => {
-  //   console.log(availableDevices.filter(item => item.name !== null))
-  //   console.log("asdasd")
-  // }, [availableDevices]);
 
   const startScan = () => {
     peripherals.clear(); // Clear the previous scanned devices
@@ -199,68 +195,68 @@ const App = () => {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ScrollView
-        style={backgroundStyle}
-        contentContainerStyle={styles.mainBody}
-        contentInsetAdjustmentBehavior="automatic">
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-            marginBottom: 40,
-          }}>
-          <View>
-            <Text
-              style={{
-                fontSize: 30,
-                textAlign: 'center',
-                color: isDarkMode ? Colors.white : Colors.black,
-              }}>
-              React Native BLE Manager
-            </Text>
-          </View>
-          <TouchableOpacity
-            activeOpacity={1.5}
-            style={styles.buttonStyle}
-            onPress={() => {
-              startScan();
+      <View
+        style={{
+          backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+          marginBottom: 40,
+        }}>
+        <View>
+          <Text
+            style={{
+              fontSize: 30,
+              textAlign: 'center',
+              color: isDarkMode ? Colors.white : Colors.black,
             }}>
-            <Text style={styles.buttonTextStyle}>
-              {isScanning ? "Scanning..." : 'Scan Bluetooth Devices'}
-            </Text>
-          </TouchableOpacity>
+            React Native BLE Manager
+          </Text>
         </View>
-        {/* list of scanned bluetooth devices */}
-      </ScrollView>
-      <FlatList
-        data={availableDevices.filter(item => item.name !== null).reduce((acc, curr) => {
-          if(!acc.find(item => item.id === curr.id)) acc.push(curr);
-          return acc;
-        }, [])}
-        renderItem={({ item }) => (
-          <View
-            style={
-              {
-                alignSelf: "center",
-                display: "inline-block",
-                paddingHorizontal: 25,
-                paddingVertical: 15,
-                backgroundColor: 'white',
-                elevation: 5,
-                borderRadius: 10,
-                marginBottom: 10
+        <TouchableOpacity
+          activeOpacity={1.5}
+          style={styles.buttonStyle}
+          onPress={() => {
+            startScan();
+          }}>
+          <Text style={styles.buttonTextStyle}>
+            {isScanning ? "Scanning..." : 'Scan Bluetooth Devices'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {/* list of scanned bluetooth devices */}
+      {availableDevices.length > 0 && <View style={{ padding: 15 }}>
+        <Text style={{ fontSize: 30, textAlign: "center", padding: 20, color: "black" }}>
+          Available Devices:
+        </Text>
+        <FlatList
+          data={availableDevices.filter(item => item.name !== null).reduce((acc, curr) => {
+            if (!acc.find(item => item.id === curr.id)) acc.push(curr);
+            return acc;
+          }, [])}
+          renderItem={({ item }) => (
+            <View
+              style={
+                {
+                  alignSelf: "center",
+                  display: "inline-block",
+                  paddingHorizontal: 25,
+                  paddingVertical: 15,
+                  backgroundColor: 'white',
+                  elevation: 5,
+                  borderRadius: 10,
+                  marginBottom: 10
+                }
               }
-            }
-          >
-            <Text>
-              {item.name}
-            </Text>
-          </View>
-        )}
-        keyExtractor={(item) => Math.random()}
-      />
+            >
+              <Text style={{ color: "black" }}>
+                {item.name}
+              </Text>
+            </View>
+          )}
+          keyExtractor={(item) => Math.random()}
+        />
+      </View>}
 
     </SafeAreaView>
-  ); px
+  );
 };
 const windowHeight = Dimensions.get('window').height;
 const styles = StyleSheet.create({
