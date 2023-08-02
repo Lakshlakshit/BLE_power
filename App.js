@@ -90,7 +90,7 @@ const App = () => {
 
     console.log('scanning began');
     if (!isScanning) {
-      BleManager.scan([], 20, false)
+      BleManager.scan([], 10, false)
         .then(() => {
           setIsScanning(true);
           handleDiscoverPeripheral();
@@ -138,11 +138,11 @@ const App = () => {
 
 
   const handleGetConnectedDevices = () => {
-    BleManager.getConnectedPeripherals([]).then(results => {             // results --->  peripheral
-      if (results.length == 0) {
+    BleManager.getConnectedPeripherals([]).then(i => {             // results --->  peripheral
+      if (i.length == 0) {
         console.log('No connected bluetooth devices');
       } else {
-        for (let i = 0; i < results.length; i++) {
+        for (let j = 0; j < results.length; j++) {
           let peripheral = results[i];
           peripheral.connected = true;
           peripherals.set(peripheral.id, peripheral);
@@ -226,7 +226,7 @@ const App = () => {
         <Text style={{ fontSize: 30, textAlign: "center", padding: 20, color: "black" }}>
           Available Devices:
         </Text>
-        <FlatList
+        {/* <FlatList
           data={availableDevices.filter(item => item.name !== null).reduce((acc, curr) => {
             if (!acc.find(item => item.id === curr.id)) acc.push(curr);
             return acc;
@@ -253,8 +253,36 @@ const App = () => {
           )}
           keyExtractor={(item) => Math.random()}
         />
-      </View>}
-
+      </View>} */
+      <FlatList
+  data={availableDevices.filter(item => item.name !== null).reduce((acc, curr) => {
+    if (!acc.find(item => item.id === curr.id)) acc.push(curr);
+    return acc;
+  }, [])}
+  renderItem={({ item }) => (
+    <TouchableOpacity
+    activeOpacity={2.5}
+      onPress={() => connectToPeripheral(item) && console.log("Establishing Connection")} // Replace 'handleItemPress' with your custom handler function
+      style={{
+        alignSelf: "center",
+        display: "inline-block",
+        paddingHorizontal: 25,
+        paddingVertical: 15,
+        backgroundColor: 'white',
+        elevation: 5,
+        borderRadius: 10,
+        marginBottom: 10
+      }}
+    >
+      <Text style={{ color: "black" }}>
+        {item.name}
+      </Text>
+    </TouchableOpacity>
+  )}
+  keyExtractor={(item) => Math.random().toString()} // Use toString() to convert the random number to string for keyExtractor
+/>
+}
+</View>}
     </SafeAreaView>
   );
 };
