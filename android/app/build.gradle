@@ -80,6 +80,10 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        project.ext.react = [
+    enableHermes: false // Set this to true to enable Hermes, false to switch to V8
+]
+
     }
     signingConfigs {
         debug {

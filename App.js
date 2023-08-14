@@ -28,6 +28,7 @@ const App = () => {
   const [display, setDisplay] = useState("none");
   const [isScanning, setIsScanning] = useState(false);      //changes
   const [connected, setConnected] = useState(false);
+  // const [readCharacteristicForDevice, setIsReading] = useState([]);
   const [bluetoothDevices, setBluetoothDevices] = useState([]);
 
   // console.log("asdasdasdasdasasdasdasdasdasasdasdasdasdas", BleManagerEmitter);
@@ -49,9 +50,9 @@ const App = () => {
         console.log('Scan is stopped');
         // console.log(peripherals);
         BleManagerEmitter.addListener('BleManagerDiscoverPeripheral', (p) => setAvailableDevices(i => [...i, p]));
-
-        handleGetConnectedDevices();
         handleDiscoverPeripheral();
+        handleGetConnectedDevices();
+
       },
     );
 
@@ -137,22 +138,8 @@ const App = () => {
   };
 
 
-  const handleGetConnectedDevices = () => {
-    BleManager.getConnectedPeripherals([]).then(i => {             // results --->  peripheral
-      if (i.length == 0) {
-        console.log('No connected bluetooth devices');
-      } else {
-        for (let j = 0; j < results.length; j++) {
-          let peripheral = results[i];
-          peripheral.connected = true;
-          peripherals.set(peripheral.id, peripheral);
-          setConnected(true);
-          setBluetoothDevices(Array.from(peripherals.values()));
-          console.log("results");
-        }
-      }
-    });
-  };
+
+
   const connectToPeripheral = peripheral => {
     if (peripheral.connected) {
       BleManager.disconnect(peripheral.id).then(() => {
@@ -171,8 +158,26 @@ const App = () => {
             setBluetoothDevices(Array.from(peripherals.values()));
           }
           alert('Connected to ' + peripheral.name);
-        })
-        .catch(error => console.log(error));
+
+
+          setTimeout(() => {
+            BleManager.read(peripheral.id, "", "") //peripheral.id, service.uuid, characteristic.uuid
+              .then(readData => {
+                // The data will be available in 'readData' as an ArrayBuffer
+                console.log(`Read data from ${service.uuid} - ${characteristic.uuid}:`, readData);
+
+
+                // If your data is not a string, you may need to decode it based on your use case
+                // For example, to convert to a string:
+                const decodedData = String.fromCharCode.apply(null, new Uint8Array(readData));
+                console.log(`Decoded data from ${service.uuid} - ${characteristic.uuid}:`, decodedData);
+              })
+              .catch(error => {
+                console.log(`Error reading characteristic ${service.uuid} - ${characteristic.uuid}:`, error);
+              });
+          }, 1000); // You can adjust the timeout duration based on your specific use case
+        }).catch(error => console.log(error));
+      handleGetConnectedDevices();
       /* Read current RSSI value */
       setTimeout(() => {
         BleManager.retrieveServices(peripheral.id).then(peripheralData => {
@@ -181,6 +186,25 @@ const App = () => {
       }, 900);
     }
   };
+
+  const handleGetConnectedDevices = () => {
+    BleManager.getConnectedPeripherals([]).then(results => {
+      if (results.length == 0) {
+        console.log('No connected bluetooth devices');
+      } else {
+        for (let i = 0; i < results.length; i++) {
+          let peripheral = results[i];
+          peripheral.connected = true;
+          peripherals.set(peripheral.id, peripheral);
+          setConnected(true);
+          setBluetoothDevices(Array.from(peripherals.values()));
+          console.log(results);
+        }
+      }
+    });
+  };
+
+
 
   const isDarkMode = useColorScheme() === 'dark';
   const backgroundStyle = {
@@ -226,63 +250,35 @@ const App = () => {
         <Text style={{ fontSize: 30, textAlign: "center", padding: 20, color: "black" }}>
           Available Devices:
         </Text>
-        {/* <FlatList
+        {<FlatList
           data={availableDevices.filter(item => item.name !== null).reduce((acc, curr) => {
             if (!acc.find(item => item.id === curr.id)) acc.push(curr);
             return acc;
           }, [])}
           renderItem={({ item }) => (
-            <View
-              style={
-                {
-                  alignSelf: "center",
-                  display: "inline-block",
-                  paddingHorizontal: 25,
-                  paddingVertical: 15,
-                  backgroundColor: 'white',
-                  elevation: 5,
-                  borderRadius: 10,
-                  marginBottom: 10
-                }
-              }
+            <TouchableOpacity
+              activeOpacity={2.5}
+              onPress={() => connectToPeripheral(item) && console.log("Establishing Connection")} // Replace 'handleItemPress' with your custom handler function
+              style={{
+                alignSelf: "center",
+                display: "inline-block",
+                paddingHorizontal: 25,
+                paddingVertical: 15,
+                backgroundColor: 'white',
+                elevation: 5,
+                borderRadius: 10,
+                marginBottom: 10
+              }}
             >
               <Text style={{ color: "black" }}>
                 {item.name}
               </Text>
-            </View>
+            </TouchableOpacity>
           )}
-          keyExtractor={(item) => Math.random()}
+          keyExtractor={(item) => Math.random().toString()} // Use toString() to convert the random number to string for keyExtractor
         />
-      </View>} */
-      <FlatList
-  data={availableDevices.filter(item => item.name !== null).reduce((acc, curr) => {
-    if (!acc.find(item => item.id === curr.id)) acc.push(curr);
-    return acc;
-  }, [])}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-    activeOpacity={2.5}
-      onPress={() => connectToPeripheral(item) && console.log("Establishing Connection")} // Replace 'handleItemPress' with your custom handler function
-      style={{
-        alignSelf: "center",
-        display: "inline-block",
-        paddingHorizontal: 25,
-        paddingVertical: 15,
-        backgroundColor: 'white',
-        elevation: 5,
-        borderRadius: 10,
-        marginBottom: 10
-      }}
-    >
-      <Text style={{ color: "black" }}>
-        {item.name}
-      </Text>
-    </TouchableOpacity>
-  )}
-  keyExtractor={(item) => Math.random().toString()} // Use toString() to convert the random number to string for keyExtractor
-/>
-}
-</View>}
+        }
+      </View>}
     </SafeAreaView>
   );
 };
